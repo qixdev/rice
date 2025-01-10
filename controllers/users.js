@@ -19,6 +19,7 @@ async function loginUser(email, password) {
 }
 
 /* Pretty complex functionality and not needed for a basic MVP, Rusya probably will do it TODO*/
+
 // async function updateUser(userId, userData) {}
 
 
@@ -28,9 +29,13 @@ async function getUserProfile(userId) {
     return user;
 }
 
-async function changeUserBalance(userId, amount) {
-    const user = await User.findById(userId);
+async function changeUserBalance(userId, amount, session = null) {
+    let query = User.findById(userId);
+    if (session) query = query.session(session);
+    const user = await query;
     if (!user) throw new Error('User not found');
+    console.log(user);
+    console.log(amount);
     user.balance = (user.balance || 0) + amount; // ensure balance is initialized
     await user.save();
     return user.balance;

@@ -1,5 +1,5 @@
 const {Router} = require('express');
-const protected = require('../middleware/auth');
+const {protect, authenticate} = require('../middleware/auth');
 const {validateFormId, validateFormBody} = require('../middleware/forms');
 const {
     createForm,
@@ -12,9 +12,12 @@ const {
     getFormSubmissions,
     submitForm,
     getUserSubmissions,
-    getUserSingleSubmission
+    getUserSingleSubmission,
+    getFormSubmissionsCount,
 } = require('../controllers/submissions');
 const {changeUserBalance} = require("../controllers/users");
+const mongoose = require('mongoose');
+const BURNT_FEE = 1;
 
 const router = Router();
 
@@ -26,10 +29,8 @@ const router = Router();
     - let users buy and sell the tokens
  */
 
-// check where user have submitted the forms, but it should output the titles though?
-// Anyway, seems like unimportant route for now.
-// TODO: should get titles of the forms(at least)
-router.get('/my-submissions', protected, async (req, res) => {
+// check where user have submitted the forms
+router.get('/my-submissions', protect, async (req, res) => {
     const user = req.user;
     const submissions = await getUserSubmissions(user._id);
     res.status(200).json(submissions);
@@ -37,24 +38,33 @@ router.get('/my-submissions', protected, async (req, res) => {
 
 
 // Get created forms of the user.
-// I think I can amend the fields of a forms in the responses to make payload smaller? todo
-router.get('', protected, async (req, res) => {
+router.get('', protect, async (req, res) => {
     const user = req.user;
     try {
         const forms = await getUserForms(user._id);
-        res.status(200).json(forms);
+        // for more lightweight payload.
+        const simplifiedForms = forms.map(form => ({
+            id: form._id,
+            title: form.title,
+            description: form.description,
+            createdAt: form.createdAt,
+            submissionLimit: form.submissionLimit,
+            totalSubmissions: form.totalSubmissions
+        }));
+        return res.status(200).json(simplifiedForms);
     } catch (err) {
         console.error(err);
-        res.status(500).json({error: 'failed to fetch user forms'});
+        return res.status(500).json({error: 'failed to fetch user forms'});
     }
 });
 
 
 // get the form to change it
 // maybe this route is redundant cuz the output of the form to submit and to edit is the same
-// todo this should be resolved after creating the ui.
-router.get('/:id', protected, validateFormId, async (req, res) => {
+// this should be resolved after creating the ui todo
+router.get('/:id', protect, validateFormId, async (req, res) => {
     const formId = req.params.id;
+
 
     try {
         const form = await getForm(formId);
@@ -72,38 +82,47 @@ router.get('/:id', protected, validateFormId, async (req, res) => {
 });
 
 
-// TODO: make transactions
-router.post('', protected, validateFormBody, async (req, res) => {
-    const formCost = calculateFormCost(req.form);
-    if (formCost > req.user.balance) {
+router.post('', protect, validateFormBody, async (req, res) => {
+    console.log(req.user);
+    const formCostPerUser = await calculateFormCost(req.form);  // without burnt fee
+    if (formCostPerUser * req.form.submissionsLimit > req.user.balance) {
         return res.status(400).json(
             {
                 error: 'your balance is not enough to create this form. ' +
                     'Try to reduce the number of questions or number of submissions'
             });
     }
+
+    req.form.rewardAmount = formCostPerUser;
+    const formCreationCost = req.form.submissionsLimit * (req.form.rewardAmount + BURNT_FEE);
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        // TODO: I think I need transactions for this stuff, cuz what if form gets uncreated but balance is taken?
         // for that you need to change the function to inject the session from the route.
-        await changeUserBalance(req.user._id, -formCost);
-        const newForm = await createForm(req.form);
+        await changeUserBalance(req.user._id, -formCreationCost, session);
+        const newForm = await createForm(req.form, session);
+        await session.commitTransaction();
         res.status(201).json(newForm);
     } catch (err) {
+        await session.abortTransaction();
         console.error(err);
         res.status(500).json({error: 'failed to create form'});
+    } finally {
+        await session.endSession();
     }
 });
 
 
 // TODO: balance stuff
 // TODO: transactions stuff.
-router.put('/:id', protected, validateFormId, validateFormBody, async (req, res) => {
+router.put('/:id', protect, validateFormId, validateFormBody, async (req, res) => {
     const formId = req.params.id;
     const newFormData = req.form;
 
     // TODO: check if user has enough balance to change the details.
     const newFormCost = calculateFormCost(newFormData);
-
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const form = await getForm(formId);
         // TODO: form schema also has to have cost field to not calculate everything again.
@@ -119,9 +138,10 @@ router.put('/:id', protected, validateFormId, validateFormBody, async (req, res)
         if (newFormCost - oldFormCost > req.user.balance) {
             return res.status(402).json({error: 'your balance is not enough to update this form.'})
         }
-        // TODO: transaction here:
-        const updatedForm = await updateForm(formId, newFormData);
-        // if user deleted some of the questions, he won't get the tokens back?
+        const updatedForm = await updateForm(formId, newFormData, session);
+        const _newBalance = await changeUserBalance(req.user._id, oldFormCost - newFormCost, session);
+
+        // TODO if user deleted some of the questions, he won't get the tokens back?
         // I think he should get (max_submissions - total_submissions) * question_cost credits back.
         // But for now this requires ditching everything here, but the codebase is still unstable, so later.
         /* Outlining how it's made
@@ -134,17 +154,17 @@ router.put('/:id', protected, validateFormId, validateFormBody, async (req, res)
         * - change the balance
         * and everything should be in a transaction.
          */
-        const _newBalance = await changeUserBalance(req.user._id, oldFormCost - newFormCost);
         res.status(200).json(updatedForm);
     } catch (err) {
         console.error(err);
+        await session.abortTransaction();
         res.status(500).json({error: 'Failed to update form'});
     }
 });
 
 
 // TODO: refunding tokens.
-router.delete('/:id', protected, validateFormId, async (req, res) => {
+router.delete('/:id', protect, validateFormId, async (req, res) => {
     const formId = req.params.id;
     const form = await getForm(formId);
     if (!form) {
@@ -163,7 +183,7 @@ router.delete('/:id', protected, validateFormId, async (req, res) => {
 
 // TODO: giving tokens
 // TODO: transactions stuff.
-router.post('/:id/submit', protected, validateFormId, async (req, res) => {
+router.post('/:id/submit', protect, validateFormId, async (req, res) => {
     const formId = req.formId;
     const user = req.user;
     const submissionData = req.body;
@@ -178,6 +198,12 @@ router.post('/:id/submit', protected, validateFormId, async (req, res) => {
     if (form.createdBy.toString() === user._id.toString()) {
         return res.status(400).json({error: 'you cannot submit your own form'});
     }
+
+    const submissionsCount = await getFormSubmissionsCount(formId);
+    if (submissionsCount >= form.submissionLimit) {
+        return res.status(403).json({error: 'this form reached it\'s full capacity'});
+    }
+
 
     const {fields} = form;
 
@@ -213,14 +239,31 @@ router.post('/:id/submit', protected, validateFormId, async (req, res) => {
 
     submissionData.formId = formId;
     submissionData.submittedBy = user._id;
-    // todo give user the tokens that he should receive for submission.
-    const submission = await submitForm(formId, submissionData);
+
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        // todo give user the tokens that he should receive for submission.
+        // todo update submission limit
+        const submission = await submitForm(formId, submissionData);
+        // calculate the difference
+        const formTokens = calculateFormCost(form);
+        const tokensSpent = submission.responses.length * form.submissionLimit;
+        const tokensReceived = submission.responses.length * form.fields.length;
+        const _newBalance = await changeUserBalance(user._id, tokensReceived, session);
+        await session.commitTransaction();
+    } catch (err) {
+        session.abortTransaction();
+        console.error(err);
+        res.status(500).json({error: 'failed to submit form'});
+    }
     res.status(201).json(submission);
 });
 
 
 // managing form submissions
-router.get('/:id/submit', protected, validateFormId, async (req, res) => {
+router.get('/:id/submit', authenticate, validateFormId, async (req, res) => {
     // get form to submit it.
     // btw, can split it on types if it's anonymous or not etc. TODO
     // maybe allow users to submit forms when it's not anonymous whether they are registered or not?
@@ -231,11 +274,14 @@ router.get('/:id/submit', protected, validateFormId, async (req, res) => {
         return res.status(404).json({error: 'form not found'});
     }
 
-    // We must do something about the protected.
-    // We should allow any users to submit the form without registering if it's anonymous.
-    // Seems that there should be less strict middleware, something like "soft_authenticate"
-    // So in this route we will just see who is the user and based on the form(anon or not) give the responses
-    // Anyway, later features.
+    // allow anonymous user, but he doesn't get any tokens.
+    // todo test it, but I think for mvp it doesn't matter.
+    if (!user) {
+        if (!form.isAnonymous) {
+            return res.status(403).json({error: 'you must be logged in to submit this form'});
+        }
+        return res.status(200).json(form);
+    }
 
     const submission = await getUserSingleSubmission(user._id, formId);
     if (submission) {
@@ -251,7 +297,7 @@ router.get('/:id/submit', protected, validateFormId, async (req, res) => {
 // get submissions of the form(as a form creator)
 // this route is too complicated and I make it with AI it will be a technical debt.
 // TODO: make aggregation YOURSELF.
-router.get('/:id/submissions', protected, validateFormId, async (req, res) => {
+router.get('/:id/submissions', protect, validateFormId, async (req, res) => {
     const formId = req.formId;
     // TODO: can make a middleware to validate if form exists and if user that asks for this route is the real owner.
     const form = await getForm(formId);

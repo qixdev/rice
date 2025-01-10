@@ -1,21 +1,23 @@
 const Form = require('../models/Form');
 
 
-const BURNT_FEE = 10;
 
 // TODO: centralize this constant in one class though.
 
-async function createForm(formData) {
-    return await Form.create(formData);
+async function createForm(formData, session = null) {
+    const options = session ? {session} : {};
+    const createdForms = await Form.create([formData], options);
+    const {__v, ...form} = createdForms[0].toObject();
+    return form;
 }
 
 async function getForm(formId) {
     return await Form.findById(formId).select('-__v');
 }
 
+// cost for each user with burnt fee.
 async function calculateFormCost(form) {
     let cost = 0;
-    cost += BURNT_FEE;
 
     const questions = form.fields;
     for (const question of questions) {
@@ -38,8 +40,9 @@ async function calculateFormCost(form) {
     return cost;
 }
 
-async function updateForm(formId, formData) {
-    return Form.findByIdAndUpdate(formId, formData, {new: true}).select('-__v');
+async function updateForm(formId, formData, session = null) {
+    const options = session ? {session, new: true} : {new: true};
+    return Form.findByIdAndUpdate(formId, formData, options).select('-__v');
 }
 
 async function deleteForm(formId) {

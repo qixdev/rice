@@ -17,16 +17,17 @@ async function authenticate(req, res, next) {
     }
 }
 
-async function protect(req, res, next) {
+async function protect(req, res, next){
     try {
         // Call authenticate to populate req.user if possible
-        await authenticate(req, res, async () => {
-            if (!req.user) throw new Error('provide correct token via Bearer authorization');
-            next();
+        await authenticate(req, res, () => {
+            if (!req.user) {
+                throw new Error('provide correct token via Bearer authorization');
+            }
         });
+        next();
     } catch (e) {
         res.status(401).json({error: e.message});
     }
 }
-
-module.exports = protect;
+module.exports = {protect, authenticate};

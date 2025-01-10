@@ -11,7 +11,14 @@ const validateFormId = (req, res, next) => {
 }
 
 const validateFormBody = (req, res, next) => {
-    const {title, description, fields, is_anonymous: isAnonymous, submissions_limit: submissionsLimit} = req.body;
+    const {
+        title,
+        description,
+        fields,
+        is_anonymous: isAnonymous,
+        submissions_limit: submissionsLimit,
+        // submission_reward: submissionReward
+    } = req.body;
 
     if (!title || typeof title !== 'string') {
         return res.status(400).json({error: 'title is required and must be a string'});
@@ -47,12 +54,17 @@ const validateFormBody = (req, res, next) => {
     if (isAnonymous !== undefined && typeof isAnonymous !== 'boolean') {
         return res.status(400).json({error: 'field `is_anonymous` must be a boolean value'});
     }
-
-    // any non-anonymous forms must have a submission limit, and it has to be strictly more than 0.
+    // todo can make a helper functions `validateNumber` and provide fields there
     if (submissionsLimit === undefined || typeof submissionsLimit !== 'number' || submissionsLimit <= 0) {
         return res.status(400).json(
             {error: 'field `submissions_limit` is required and must be a valid number greater than 0'});
     }
+
+
+    // if (submissionReward === undefined || typeof submissionReward !== 'number' || submissionsLimit <= 0) {
+    //     return res.status(400).json(
+    //         {error: 'field `submissions_limit` is required and must be a valid number greater than 0'});
+    // }
 
     req.form = {
         title,
@@ -60,6 +72,7 @@ const validateFormBody = (req, res, next) => {
         fields,
         isAnonymous: isAnonymous || false,
         submissionsLimit: submissionsLimit,
+        // submissionReward: submissionReward,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: req.user._id,

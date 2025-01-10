@@ -3,11 +3,14 @@ const Submission = require("../models/FormSubmission");
 const Form = require("../models/Form");
 
 async function getUserSingleSubmission(userId, formId) {
-    return await Submission.findOne({submittedBy: userId, formId: formId});
+    return Submission.findOne({submittedBy: userId, formId: formId});
 }
 
 async function getUserSubmissions(userId) {
-    return await Submission.find({submittedBy: userId}).select('-__v')
+    return Submission.find(
+        {submittedBy: userId}).select(
+        '-__v -submittedBy').populate(
+        'formId', 'title'); // populating to get title to display on frontend.
 }
 
 async function submitForm(formId, submissionData) {
@@ -18,7 +21,11 @@ async function submitForm(formId, submissionData) {
 }
 
 async function getFormSubmissions(formId) {
-    return await Submission.find({formId}).populate('submittedBy', 'email');
+    return Submission.find({formId}).populate('submittedBy', 'email');
+}
+
+async function getFormSubmissionsCount(formId) {
+    return Submission.countDocuments({formId});
 }
 
 module.exports = {
@@ -26,4 +33,5 @@ module.exports = {
     submitForm,
     getFormSubmissions,
     getUserSingleSubmission,
+    getFormSubmissionsCount,
 }

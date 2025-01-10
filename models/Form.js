@@ -17,6 +17,9 @@ const formSchema = new mongoose.Schema({
         }
     ],
     isAnonymous: {type: Boolean, default: false},
+    // todo: make rewarding to be voluntarily expanded.
+    rewardAmount: {type: Number, required: true},
+    // capacity OR tokens that each user should receive, otherwise it's hard to compute just using the submissions.
     submissionsLimit: {type: Number, required: true}, // Must be at least 1
     createdBy: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true}, // Reference to User
     createdAt: {type: Date, default: Date.now},
