@@ -61,7 +61,7 @@ export default {
     },
     async fetchCrypto() {
       try {
-        const response = await axios.get('http://localhost:3000/assignments/crypto/trump');
+        const response = await axios.get('http://localhost:3000/assignments/crypto/bitcoin');
         this.cryptoData = response.data;
       } catch (err) {
         this.error = 'Failed to fetch Trump Coin data';
