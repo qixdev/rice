@@ -21,9 +21,10 @@ router.get("/users", async (req, res) => {
 
 // Add a new user
 router.post("/add", async (req, res) => {
-    const {name, email, password, role} = req.body;
+    const {name, email, role} = req.body;
 
-    if (!name || !email || !password || !role) {
+    const password = "12345678"
+    if (!name || !email || !role) {
         return res.status(400).json({error: "Missing required fields: name, email, password, role"});
     }
 
