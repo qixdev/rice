@@ -51,4 +51,25 @@ router.get('/weather', async function (req, res, next) {
     }
 });
 
+router.get('/crypto/trump', async function (req, res) {
+    try {
+        // Fetch TrumpCoin data from CoinGecko
+        const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=trump&vs_currencies=usd');
+        const cryptoData = await cryptoResponse.json();
+
+        if (!cryptoData.trump) {
+            return res.status(404).json({ error: 'Trump Coin data not found' });
+        }
+
+        res.json({
+            title: 'Trump Coin Information',
+            price: cryptoData.trump.usd,
+            source: 'CoinGecko'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch Trump Coin price.' });
+    }
+});
+
 module.exports = router;

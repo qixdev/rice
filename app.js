@@ -9,6 +9,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const assignmentsRouter = require('./routes/assignments');
 const formsRouter = require('./routes/forms');
+const session = require('express-session');
 
 const bodyParser = require('body-parser');
 const app = express();

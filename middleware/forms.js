@@ -1,4 +1,4 @@
-import {Types} from "mongoose";
+const { Types } = require("mongoose");
 
 const validateFormId = (req, res, next) => {
     const formId = req.params.id;
@@ -81,7 +81,7 @@ const validateFormBody = (req, res, next) => {
     next();
 };
 
-export {validateFormId, validateFormBody};
+module.exports = { validateFormId, validateFormBody };
 // Using `module.exports` in this case could cause an error because the file uses ES6 `import` and `export` syntax.
 // Mixing CommonJS (`module.exports`) and ES6 modules can lead to compatibility issues, as they are different module systems.
 // Specifically, when using ES6 destructured `import` statements (`import { ... }`), the exported values must align with
