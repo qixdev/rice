@@ -51,10 +51,14 @@ router.get('/weather', async function (req, res, next) {
     }
 });
 
-router.get('/crypto/trump', async function (req, res) {
+router.get('/crypto/bitcoin', async function (req, res) {
     try {
-        // Fetch TrumpCoin data from CoinGecko
-        const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=trump&vs_currencies=usd');
+        const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+
+        if (!cryptoResponse.ok) {
+            return res.status(cryptoResponse.status).json({ error: 'Failed to fetch Trump Coin price.' });
+        }
+
         const cryptoData = await cryptoResponse.json();
 
         if (!cryptoData.trump) {
@@ -67,9 +71,10 @@ router.get('/crypto/trump', async function (req, res) {
             source: 'CoinGecko'
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching data:', error);
         res.status(500).json({ error: 'Failed to fetch Trump Coin price.' });
     }
 });
+
 
 module.exports = router;

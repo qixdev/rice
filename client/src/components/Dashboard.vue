@@ -48,13 +48,15 @@ export default {
     async fetchWeather() {
       try {
         const response = await axios.get('http://localhost:3000/assignments/weather', {
-          params: { city: 'London' },
+          params: {city: 'London'},
         });
         this.weatherData = response.data.weather;
-        this.weatherData.city = 'London';
+        this.weatherData.city = 'London'; // Если city не передается с сервера
       } catch (err) {
         this.error = 'Failed to fetch weather data';
         console.error(err);
+      } finally {
+        this.loading = false;
       }
     },
     async fetchCrypto() {
@@ -64,13 +66,14 @@ export default {
       } catch (err) {
         this.error = 'Failed to fetch Trump Coin data';
         console.error(err);
+      } finally {
+        this.loading = false;
       }
     },
   },
-  async mounted() {
+  mounted() {
     this.fetchWeather();
     this.fetchCrypto();
-    this.loading = false;
   },
 };
 </script>
