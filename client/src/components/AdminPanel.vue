@@ -2,7 +2,9 @@
   <div class="admin-panel">
     <h2>Admin Panel - Manage Users</h2>
 
-    <!-- Create User Form -->
+    <button @click="createUser">Add New User</button>
+
+    <!-- Create/Edit User Form -->
     <div v-if="isCreatingOrEditing" class="user-form">
       <h3>{{ formTitle }}</h3>
       <form @submit.prevent="submitForm">
@@ -60,7 +62,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
@@ -70,78 +72,70 @@ export default {
       error: null,
       isCreatingOrEditing: false,
       isEditing: false,
-      formData: { name: '', email: '', role: 'user' },
-      formTitle: 'Create User',
+      formData: { name: "", email: "", role: "user" },
+      formTitle: "Create User",
     };
   },
   methods: {
-    // Fetch the users from the server
     async fetchUsers() {
       this.loading = true;
       try {
-        const response = await axios.get('/api/users');
+        const response = await axios.get("http://localhost:3000/admin/users");
         this.users = response.data;
       } catch (err) {
-        this.error = 'Failed to fetch users.';
+        this.error = "Failed to fetch users.";
         console.error(err);
       } finally {
         this.loading = false;
       }
     },
 
-    // Open the form for creating a new user
     createUser() {
       this.resetForm();
       this.isCreatingOrEditing = true;
-      this.formTitle = 'Create User';
+      this.formTitle = "Create User";
       this.isEditing = false;
     },
 
-    // Open the form for editing an existing user
     editUser(user) {
       this.isCreatingOrEditing = true;
-      this.formTitle = 'Edit User';
+      this.formTitle = "Edit User";
       this.isEditing = true;
       this.formData = { ...user };
     },
 
-    // Reset the form
     resetForm() {
-      this.formData = { name: '', email: '', role: 'user' };
+      this.formData = { name: "", email: "", role: "user" };
       this.isCreatingOrEditing = false;
       this.error = null;
     },
 
-    // Submit the form (create or update user)
     async submitForm() {
       this.loading = true;
       try {
         if (this.isEditing) {
-          // Update user
-          await axios.put(`/api/users/${this.formData._id}`, this.formData);
+          await axios.put(`http://localhost:3000/admin/edit/${this.formData._id}`, this.formData);
         } else {
-          // Create new user
-          await axios.post('/api/users', this.formData);
+          await axios.post("http://localhost:3000/admin/add", this.formData);
         }
         this.resetForm();
         this.fetchUsers();
       } catch (err) {
-        this.error = 'Failed to save user data.';
+        this.error = "Failed to save user data.";
         console.error(err);
       } finally {
         this.loading = false;
       }
     },
 
-    // Delete a user
     async deleteUser(userId) {
-      const confirmDelete = confirm('Are you sure you want to delete this user?');
+      const confirmDelete = confirm("Are you sure you want to delete this user?");
       if (confirmDelete) {
         try {
-          await axios.delete(`/api/users/${userId}`);
+          await axios.delete(`http://localhost:3000/admin/delete/${userId}`);
           this.fetchUsers();
         } catch (err) {
-          this.error = 'Failed to delete user.';
+          this.error = "Failed to delete user.";
           console.error(err);
         }
       }
@@ -168,7 +162,8 @@ table {
   border-collapse: collapse;
 }
 
-table th, table td {
+table th,
+table td {
   padding: 10px;
   text-align: left;
 }

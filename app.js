@@ -9,6 +9,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const assignmentsRouter = require('./routes/assignments');
 const formsRouter = require('./routes/forms');
+const adminRouter = require('./routes/admin');
 const session = require('express-session');
 
 const bodyParser = require('body-parser');
@@ -24,13 +25,20 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
+app.use(cors({
+    origin: '*',  // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Specify allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'],  // Allowed headers
+    credentials: false  // Set to true if using cookies or auth headers
+}));
+
 app.use(bodyParser.json());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/assignments', assignmentsRouter);
 app.use('/forms', formsRouter);
+app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

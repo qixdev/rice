@@ -195,9 +195,9 @@ router.post('/:id/submit', protect, validateFormId, async (req, res) => {
         return res.status(404).json({error: 'form not found'});
     }
 
-    if (form.createdBy.toString() === user._id.toString()) {
-        return res.status(400).json({error: 'you cannot submit your own form'});
-    }
+    // if (form.createdBy.toString() === user._id.toString()) {
+    //     return res.status(400).json({error: 'you cannot submit your own form'});
+    // }
 
     const submissionsCount = await getFormSubmissionsCount(formId);
     if (submissionsCount >= form.submissionLimit) {
@@ -209,9 +209,9 @@ router.post('/:id/submit', protect, validateFormId, async (req, res) => {
 
     // Check if user has already submitted
     const isAlreadySubmitted = await getFormSubmissions(formId, user._id);
-    if (isAlreadySubmitted.length > 0) {
-        return res.status(403).json({error: 'you have already submitted this form'});
-    }
+    // if (isAlreadySubmitted.length > 0) {
+    //     return res.status(403).json({error: 'you have already submitted this form'});
+    // }
     // Validate responses TODO: check everything again, maybe separate on functions, cuz it is becoming bloated.
     for (const field of fields) {
         const response = submissionData.responses.find(r => r.fieldId.toString() === field._id.toString());
@@ -256,9 +256,9 @@ router.post('/:id/submit', protect, validateFormId, async (req, res) => {
     } catch (err) {
         session.abortTransaction();
         console.error(err);
-        res.status(500).json({error: 'failed to submit form'});
+        return res.status(500).json({error: 'failed to submit form'});
     }
-    res.status(201).json(submission);
+    res.status(201).json(submissionData);
 });
 
 

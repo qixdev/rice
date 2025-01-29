@@ -5,15 +5,15 @@
       <li @click="showRegisterModal">Register</li>
       <li @click="goToProfile">My Profile</li>
     </ul>
-    <LoginModal v-if="isLoginModalVisible" @close="isLoginModalVisible = false" />
-    <RegisterModal v-if="isRegisterModalVisible" @close="isRegisterModalVisible = false" />
+    <LoginModal v-if="isLoginModalVisible" @close="isLoginModalVisible = false"/>
+    <RegisterModal v-if="isRegisterModalVisible" @close="isRegisterModalVisible = false"/>
   </nav>
 </template>
 
 <script>
 import LoginModal from './LoginModal.vue';
 import RegisterModal from './RegisterModal.vue';
-import { useRouter } from 'vue-router';
+import {useRouter} from 'vue-router';
 
 export default {
   components: {
@@ -35,7 +35,7 @@ export default {
     },
     goToProfile() {
       const router = useRouter();
-      router.push('/profile');
+      router.push('/users/profile');
     },
   },
 };
@@ -49,10 +49,12 @@ nav {
   background-color: #282c34;
   color: white;
 }
+
 ul {
   list-style: none;
   display: flex;
 }
+
 li {
   margin: 0 15px;
   cursor: pointer;
