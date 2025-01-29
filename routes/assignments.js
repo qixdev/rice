@@ -56,23 +56,23 @@ router.get('/crypto/bitcoin', async function (req, res) {
         const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
 
         if (!cryptoResponse.ok) {
-            return res.status(cryptoResponse.status).json({ error: 'Failed to fetch Trump Coin price.' });
+            return res.status(cryptoResponse.status).json({ error: 'Failed to fetch Bitcoin price.' });
         }
 
         const cryptoData = await cryptoResponse.json();
 
         if (!cryptoData.trump) {
-            return res.status(404).json({ error: 'Trump Coin data not found' });
+            return res.status(404).json({ error: 'Bitcoin data not found' });
         }
 
         res.json({
-            title: 'Trump Coin Information',
+            title: 'Bitcoin Information',
             price: cryptoData.trump.usd,
             source: 'CoinGecko'
         });
     } catch (error) {
         console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'Failed to fetch Trump Coin price.' });
+        res.status(500).json({ error: 'Failed to fetch Bitcoin price.' });
     }
 });
 
