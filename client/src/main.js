@@ -7,6 +7,7 @@ import FAQ from './components/FAQ.vue';
 import './styles.css';
 import Dashboard from "./components/Dashboard.vue";
 import AdminPanel from "./components/AdminPanel.vue";
+import NewsList from "./components/NewsList.vue";
 
 createApp(App).mount('#app');
 
@@ -17,6 +18,7 @@ const routes = [
     {path: '/faq', component: FAQ},
     {path: '/dashboard', component: Dashboard},
     {path: '/admin', component: AdminPanel},
+    {path: '/news', component: NewsList}
 ];
 
 const router = createRouter({
