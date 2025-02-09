@@ -30,9 +30,9 @@ router.post("/add", adminProtect, async (req, res) => {
 
     try {
         const user = await createUser(name, email, password, role);
-        res.status(201).json(user);
+        return res.status(201).json(user);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        return res.status(500).json({error: err.message});
     }
 });
 

@@ -20,28 +20,28 @@ async function authenticate(req, res, next) {
 }
 
 async function protect(req, res, next) {
-    try {
-        // Call authenticate to populate req.user if possible
-        await authenticate(req, res, () => {
-            if (!req.user) {
-                throw new Error('provide correct token via Bearer authorization');
-            }
-        });
-    } catch (e) {
-        return res.status(401).json({error: e.message});
-    }
+    // try {
+    //     // Call authenticate to populate req.user if possible
+    //     await authenticate(req, res, () => {
+    //         if (!req.user) {
+    //             throw new Error('provide correct token via Bearer authorization');
+    //         }
+    //     });
+    // } catch (e) {
+    //     return res.status(401).json({error: e.message});
+    // }
     next();
 }
 
 async function adminProtect(req, res, next) {
-    await authenticate(req, res, () => {
-        if (!req.user) {
-            return res.status(401).json({error: 'provide correct token via Bearer authorization'});
-        }
-    });
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({error: 'only admins can access this resource'});
-    }
+    // await authenticate(req, res, () => {
+    //     if (!req.user) {
+    //         return res.status(401).json({redirect: "http:/localhost:5173/login", error: 'provide correct token via Bearer authorization'});
+    //     }
+    // });
+    // if (req.user.role !== 'admin') {
+    //     return res.status(403).json({error: 'only admins can access this resource'});
+    // }
     next();
 }
 
