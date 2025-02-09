@@ -5,7 +5,8 @@ async function getUserByEmail(email) {
 }
 
 async function registerUser(email, password) {
-    const user = await User.create({email, password});
+    const user = await User.create({email, password, role: "user"});
+    // User schema uses bcrypt under the hood if you go to definition of the schema(pre-save method)
     return {token: user.generateToken()};
 }
 
@@ -13,7 +14,7 @@ async function registerUser(email, password) {
 async function loginUser(email, password) {
     const user = await User.findOne({email: email});
     if (!user) throw new Error('Invalid credentials');
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(password); // this method uses bcrypt under the hood
     if (!isMatch) throw new Error('Invalid credentials');
     return {token: user.generateToken()};
 }

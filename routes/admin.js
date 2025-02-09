@@ -10,7 +10,7 @@ const {adminProtect} = require("../middleware/auth");
 const router = express.Router();
 
 // Get all users
-router.get("/users", async (req, res) => {
+router.get("/users", adminProtect, async (req, res) => {
     try {
         const users = await getAllUsers();
         res.json(users);
@@ -20,7 +20,7 @@ router.get("/users", async (req, res) => {
 });
 
 // Add a new user
-router.post("/add", async (req, res) => {
+router.post("/add", adminProtect, async (req, res) => {
     const {name, email, role} = req.body;
 
     const password = "12345678"
@@ -37,7 +37,7 @@ router.post("/add", async (req, res) => {
 });
 
 // Edit user
-router.put("/edit/:id", async (req, res) => {
+router.put("/edit/:id", adminProtect, async (req, res) => {
     try {
         const updatedUser = await updateUser(req.params.id, req.body);
         res.status(200).json(updatedUser);
@@ -47,7 +47,7 @@ router.put("/edit/:id", async (req, res) => {
 });
 
 // Delete user
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", adminProtect, async (req, res) => {
     try {
         await deleteUser(req.params.id);
         res.status(200).json({message: "User deleted successfully"});

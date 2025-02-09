@@ -10,7 +10,7 @@ router.post('/register', async (req, res) => {
 
     try {
         const user = await getUserByEmail(email);
-        if (user) {
+        if (user) { // to avoid duplicates
             res.status(409).json({error: 'User already exists'});
             return
         }
@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
 router.get('/profile', protect, async (req, res) => {
     try {
         const data = await getUserProfile(req.user._id);
-        res.json(data);
+        return res.json(data);
     } catch (err) {
         res.status(500).json({error: err.message});
     }
@@ -56,5 +56,6 @@ router.put('/replenish-balance', protect, async (req, res) => {
         res.status(500).json({error: e.message});
     }
 })
+
 
 module.exports = router;

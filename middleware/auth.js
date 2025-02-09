@@ -6,10 +6,12 @@ async function authenticate(req, res, next) {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return next();
+
         const jwtData = jwt.verify(token, process.env.JWT_SECRET);
         req.user = await User.findById(jwtData.id).select('-password -__v');
         if (!req.user) return next();
-        req.user = req.user.toObject(); // Convert Mongoose document to plain object
+
+        req.user = req.user.toObject();
         req.user._id = req.user._id.toString();
         next();
     } catch (e) {
@@ -25,24 +27,22 @@ async function protect(req, res, next) {
                 throw new Error('provide correct token via Bearer authorization');
             }
         });
-        next();
     } catch (e) {
-        res.status(401).json({error: e.message});
+        return res.status(401).json({error: e.message});
     }
+    next();
 }
 
 async function adminProtect(req, res, next) {
-    try {
+    await authenticate(req, res, () => {
         if (!req.user) {
-            throw new Error('provide correct token via Bearer authorization');
+            return res.status(401).json({error: 'provide correct token via Bearer authorization'});
         }
-        if (req.user.username != 'danial') {
-            throw new Error('provide correct token via Bearer authorization');
-        }
-        next();
-    } catch (e) {
-        res.status(401).json({error: e.message});
+    });
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({error: 'only admins can access this resource'});
     }
+    next();
 }
 
 module.exports = {protect, authenticate, adminProtect};

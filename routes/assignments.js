@@ -7,6 +7,32 @@
 const express = require('express');
 const router = express.Router();
 
+
+router.get('/crypto/bitcoin', async function (req, res) {
+    try {
+        const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+        if (!cryptoResponse.ok) {
+            return res.status(cryptoResponse.status).json({error: 'Failed to fetch Bitcoin price.'});
+        }
+
+        const cryptoData = await cryptoResponse.json();
+
+        if (!cryptoData.bitcoin) {
+            return res.status(404).json({error: 'Bitcoin data not found'});
+        }
+
+        res.json({
+            title: 'Bitcoin Information',
+            price: cryptoData.bitcoin.usd,
+            source: 'CoinGecko'
+        });
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({error: 'Failed to fetch Bitcoin price.'});
+    }
+});
+
+
 /* GET home page. */
 router.get('/weather', async function (req, res, next) {
     const fetch = require('node-fetch');
@@ -48,31 +74,6 @@ router.get('/weather', async function (req, res, next) {
     } catch (error) {
         console.error(error);
         res.status(500).json({error: 'Failed to fetch weather information.'});
-    }
-});
-
-router.get('/crypto/bitcoin', async function (req, res) {
-    try {
-        const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-
-        if (!cryptoResponse.ok) {
-            return res.status(cryptoResponse.status).json({ error: 'Failed to fetch Bitcoin price.' });
-        }
-
-        const cryptoData = await cryptoResponse.json();
-
-        if (!cryptoData.trump) {
-            return res.status(404).json({ error: 'Bitcoin data not found' });
-        }
-
-        res.json({
-            title: 'Bitcoin Information',
-            price: cryptoData.trump.usd,
-            source: 'CoinGecko'
-        });
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'Failed to fetch Bitcoin price.' });
     }
 });
 

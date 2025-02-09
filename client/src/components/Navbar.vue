@@ -4,6 +4,8 @@
       <li @click="showLoginModal">Login</li>
       <li @click="showRegisterModal">Register</li>
       <li @click="goToProfile">My Profile</li>
+      <li @click="goToAdmin">Admin</li>
+      <li @click="goToDashboard">Dashboard</li>
     </ul>
     <LoginModal v-if="isLoginModalVisible" @close="isLoginModalVisible = false"/>
     <RegisterModal v-if="isRegisterModalVisible" @close="isRegisterModalVisible = false"/>
@@ -34,9 +36,14 @@ export default {
       this.isRegisterModalVisible = true;
     },
     goToProfile() {
-      const router = useRouter();
-      router.push('/users/profile');
+      this.$router.push('/profile');
     },
+    goToAdmin() {
+      this.$router.push('/admin');
+    },
+    goToDashboard() {
+      this.$router.push('/dashboard');
+    }
   },
 };
 </script>
