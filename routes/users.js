@@ -15,13 +15,12 @@ router.post('/register', async (req, res) => {
             return
         }
         const data = await registerUser(email, password);
-        res.cookie("jwt", data.token, {
+        return res.cookie("jwt", data.token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "Strict",
+            secure: false,
+            sameSite: "none",
             maxAge: 3600000
-        });
-        res.status(201).json(data);
+        }).json(data).status(201);
     } catch (err) {
         res.status(500).json({error: err.message});
     }
@@ -31,13 +30,12 @@ router.post('/login', async (req, res) => {
     const {email, password} = req.body;
     try {
         const data = await loginUser(email, password);
-        res.cookie("jwt", data.token, {
+        return res.cookie("jwt", data.token, {
             httpOnly: true,
             secure: false,
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 3600000
-        });
-        return res.json(data);
+        }).json(data)
     } catch (err) {
         console.log(err);
         res.status(500).json({error: err.message});

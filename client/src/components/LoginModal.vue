@@ -5,8 +5,8 @@
       <h2>Login</h2>
 
       <form @submit.prevent="login">
-        <input v-model="email" type="email" placeholder="Email" required />
-        <input v-model="password" type="password" placeholder="Password" required />
+        <input v-model="email" type="email" placeholder="Email" required/>
+        <input v-model="password" type="password" placeholder="Password" required/>
         <button type="submit">Login</button>
       </form>
 
@@ -34,7 +34,7 @@ export default {
         const response = await axios.post('http://localhost:3000/users/login', {
           email: this.email,
           password: this.password,
-        });
+        }, {withCredentials: true});
         console.log('Login successful:', response.data);
         this.$emit('close');
       } catch (error) {
@@ -66,15 +66,18 @@ export default {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 5px;
   width: 300px;
 }
+
 .close {
   cursor: pointer;
 }
+
 .google-btn {
   background-color: #db4437;
   color: white;

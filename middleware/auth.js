@@ -3,7 +3,8 @@ const User = require('../models/User');
 
 async function authenticate(req, res, next) {
     try {
-        const token = req.cookies.jwt;
+        console.log(req.cookies);
+        const token = req.cookies?.jwt;
         if (!token) return next();
 
         const jwtData = jwt.verify(token, process.env.JWT_SECRET);
@@ -22,12 +23,12 @@ async function authenticate(req, res, next) {
 
 async function protect(req, res, next) {
     try {
-        // await authenticate(req, res, () => {
-        //     if (!req.user) {
-        //         return res.status(401).json({ error: 'Provide correct token via Bearer authorization' });
-        //     }
-        //     next();
-        // });
+        await authenticate(req, res, () => {
+            if (!req.user) {
+                return res.status(401).json({ error: 'Provide correct token via Bearer authorization' });
+            }
+            next();
+        });
     } catch (e) {
         return res.status(401).json({ error: e.message });
     }
@@ -36,21 +37,21 @@ async function protect(req, res, next) {
 
 async function adminProtect(req, res, next) {
     try {
-        // await authenticate(req, res, async () => {
-        //     const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1];
-        //     if (!token) {
-        //         return res.status(401).json({
-        //             redirect: "http://localhost:5173/login",
-        //             error: "Unauthorized access",
-        //         });
-        //     }
-        //
-        //     if (req.user.role !== "admin") {
-        //         return res.status(403).json({ error: "Only admins can access this resource" });
-        //     }
-        //
-        //     next();
-        // });
+        await authenticate(req, res, async () => {
+            const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1];
+            if (!token) {
+                return res.status(401).json({
+                    redirect: "http://localhost:5173/login",
+                    error: "Unauthorized access",
+                });
+            }
+
+            if (req.user.role !== "admin") {
+                return res.status(403).json({ error: "Only admins can access this resource" });
+            }
+
+            next();
+        });
     } catch (error) {
         res.status(500).json({ error: "Server error" });
     }

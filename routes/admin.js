@@ -13,9 +13,9 @@ const router = express.Router();
 router.get("/users", adminProtect, async (req, res) => {
     try {
         const users = await getAllUsers();
-        res.json(users);
+        return res.json(users);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        return res.status(500).json({error: err.message});
     }
 });
 
