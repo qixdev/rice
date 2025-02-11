@@ -16,7 +16,7 @@
     </div>
 
     <div v-if="cryptoData" class="crypto">
-      <h2>Trump Coin Price</h2>
+      <h2>BitCoin Price</h2>
       <p><strong>Price (USD):</strong> ${{ cryptoData.price }}</p>
       <p><strong>Source:</strong> {{ cryptoData.source }}</p>
     </div>
@@ -64,7 +64,7 @@ export default {
         const response = await axios.get('http://localhost:3000/assignments/crypto/bitcoin');
         this.cryptoData = response.data;
       } catch (err) {
-        this.error = 'Failed to fetch Trump Coin data';
+        this.error = 'Failed to fetch BitCoin data';
         console.error(err);
       } finally {
         this.loading = false;

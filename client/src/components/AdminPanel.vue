@@ -155,7 +155,7 @@ export default {
     async fetchNews() {
       this.loading = true;
       try {
-        const response = await axios.get("/news");
+        const response = await axios.get("http://localhost:3000/news", { withCredentials: true });
         this.newsList = response.data;
       } catch (err) {
         this.error = "Failed to fetch news.";
@@ -186,13 +186,23 @@ export default {
     },
 
     async submitNewsForm() {
-      this.loading = true;
-
+      const formData = new FormData();
+      formData.append("name_en", this.newsFormData.name_en);
+      formData.append("name_ru", this.newsFormData.name_ru);
+      formData.append("desc_en", this.newsFormData.desc_en);
+      formData.append("desc_ru", this.newsFormData.desc_ru)
+      if (this.newsFormData.images.length !== 3) {
+        alert("3 Images needed");
+        return;
+      }
+      this.newsFormData.images.forEach((file, index) => {
+        formData.append("images", file);
+      });
       try {
         if (this.isEditingNews) {
-          await axios.put(`http://localhost:3000/news/${this.newsFormData._id}`, this.newsFormData);
+          await axios.put(`http://localhost:3000/news/${this.newsFormData._id}`, formData, { withCredentials: true });
         } else {
-          await axios.post("http://localhost:3000/news", this.newsFormData);
+          await axios.post("http://localhost:3000/news", formData, { withCredentials: true });
         }
         this.resetNewsForm();
         await this.fetchNews();
@@ -205,7 +215,7 @@ export default {
 
     async deleteNews(newsId) {
       if (confirm("Delete this news?")) {
-        await axios.delete(`http://localhost:3000/news/${newsId}`);
+        await axios.delete(`http://localhost:3000/news/${newsId}`, { withCredentials: true });
         await this.fetchNews();
       }
     },
@@ -217,7 +227,7 @@ export default {
     async fetchUsers() {
       this.loading = true;
       try {
-        const response = await axios.get("http://localhost:3000/admin/users");
+        const response = await axios.get("http://localhost:3000/admin/users", { withCredentials: true });
         this.users = response.data;
       } catch (err) {
         this.error = "Failed to fetch users.";
@@ -249,9 +259,9 @@ export default {
       this.loading = true;
       try {
         if (this.isEditingUser) {
-          await axios.put(`http://localhost:3000/admin/edit/${this.userFormData._id}`, this.userFormData);
+          await axios.put(`http://localhost:3000/admin/edit/${this.userFormData._id}`, this.userFormData, { withCredentials: true });
         } else {
-          await axios.post("http://localhost:3000/admin/add", this.userFormData);
+          await axios.post("http://localhost:3000/admin/add", this.userFormData, { withCredentials: true });
         }
         this.resetUserForm();
         await this.fetchUsers();
@@ -264,7 +274,7 @@ export default {
 
     async deleteUser(userId) {
       if (confirm("Delete this user?")) {
-        await axios.delete(`http://localhost:3000/admin/delete/${userId}`);
+        await axios.delete(`http://localhost:3000/admin/delete/${userId}`, { withCredentials: true });
         await this.fetchUsers();
       }
     },

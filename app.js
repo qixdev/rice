@@ -17,6 +17,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const connectDB = require('./models/database');
 
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -28,10 +29,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // <-- Serve uploaded images
 
 app.use(cors({
-    origin: '*',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false
+    credentials: true
 }));
 
 app.use(bodyParser.json());

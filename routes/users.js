@@ -33,8 +33,8 @@ router.post('/login', async (req, res) => {
         const data = await loginUser(email, password);
         res.cookie("jwt", data.token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "Strict",
+            secure: false,
+            sameSite: "lax",
             maxAge: 3600000
         });
         return res.json(data);
