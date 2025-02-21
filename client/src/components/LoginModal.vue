@@ -37,7 +37,7 @@ export default {
         const response = await axios.post('http://localhost:3000/users/login', {
           email: this.email,
           password: this.password,
-        });
+        }, {withCredentials: true});
         console.log('Login successful:', response.data);
         this.$emit('close');
       } catch (error) {
