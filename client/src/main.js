@@ -12,6 +12,7 @@ import FormList from "./components/FormList.vue";
 import FormCreate from "./components/FormCreate.vue";
 import FormSubmit from "./components/FormSubmit.vue";
 import FormView from "./components/FormView.vue";
+import axios from "axios";
 
 createApp(App).mount('#app');
 
@@ -33,5 +34,5 @@ const router = createRouter({
     history: createWebHistory(),
     routes,
 });
-
+axios.defaults.withCredentials = true
 createApp(App).use(router).mount('#app');

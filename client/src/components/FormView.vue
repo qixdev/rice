@@ -15,7 +15,9 @@ export default {
     return { form: {} };
   },
   mounted() {
-    axios.get('http://localhost:3000/forms/' + this.$route.params.id).then(res => {
+    console.log(this.$route);
+    console.log("Rusya is NOOB")
+    axios.get('http://localhost:3000/forms/' + this.$route.params.form.id).then(res => {
       this.form = res.data;
     });
   }

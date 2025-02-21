@@ -2,19 +2,19 @@
   <div class="container">
     <h2>Создать форму</h2>
     <div class="form-card">
-      <input v-model="form.title" placeholder="Название формы" class="input" />
+      <input v-model="form.title" placeholder="Название формы" class="input"/>
       <textarea v-model="form.description" placeholder="Описание" class="textarea"></textarea>
 
       <div v-for="(field, index) in form.fields" :key="index" class="field">
-        <input v-model="field.label" placeholder="Название поля" class="input" />
+        <input v-model="field.label" placeholder="Название поля" class="input"/>
         <select v-model="field.type" class="select">
           <option value="text">Текст</option>
           <option value="checkbox">Чекбокс</option>
           <option value="radio">Радио</option>
         </select>
-        <input v-if="field.type !== 'text'" v-model="field.options" placeholder="Опции (через запятую)" class="input" />
+        <input v-if="field.type !== 'text'" v-model="field.options" placeholder="Опции (через запятую)" class="input"/>
         <label>
-          <input type="checkbox" v-model="field.required" /> Обязательное поле
+          <input type="checkbox" v-model="field.required"/> Обязательное поле
         </label>
         <button @click="removeField(index)" class="delete-btn">Удалить</button>
       </div>
@@ -31,17 +31,17 @@ import axios from 'axios';
 export default {
   name: 'FormCreate',
   data() {
-    return { form: { title: '', description: '', fields: [] } };
+    return {form: {title: '', description: '', fields: []}};
   },
   methods: {
     addField() {
-      this.form.fields.push({ label: '', type: 'text', options: [], required: false });
+      this.form.fields.push({label: '', type: 'text', options: [], required: false});
     },
     removeField(index) {
       this.form.fields.splice(index, 1);
     },
     createForm() {
-      axios.post('http://localhost:3000/forms', this.form).then(() => {
+      axios.post('http://localhost:3000/forms', this.form, {withCredentials: true}).then(() => {
         this.$router.push('/forms');
       });
     }
