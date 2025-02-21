@@ -5,7 +5,7 @@ async function getUserByEmail(email) {
 }
 
 async function registerUser(email, password) {
-    const user = await User.create({email, password, role: "user"});
+    const user = await User.create({email, password, role: "user", balance: 100000});
     // User schema uses bcrypt under the hood if you go to definition of the schema(pre-save method)
     return {token: user.generateToken()};
 }

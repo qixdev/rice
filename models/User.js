@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
     balance: {type: Number, default: 0}
 });
 
+userSchema.index({email: 1}, {unique: true});
+
 // Hash password before saving
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();

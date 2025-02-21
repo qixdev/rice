@@ -25,6 +25,11 @@ const formSchema = new mongoose.Schema({
     createdAt: {type: Date, default: Date.now},
 });
 
+formSchema.index({title: "text", description: "text"});
+formSchema.index({createdAt: -1});
+formSchema.index({createdBy: 1})
+
+
 /* Here is a decision point that I have
 * For anonymous forms, what should I do?
 * - still apply a submission_limit

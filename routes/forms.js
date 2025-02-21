@@ -92,7 +92,6 @@ router.post('', protect, validateFormBody, async (req, res) => {
                     'Try to reduce the number of questions or number of submissions'
             });
     }
-
     req.form.rewardAmount = formCostPerUser;
     const formCreationCost = req.form.submissionsLimit * (req.form.rewardAmount + BURNT_FEE);
     const session = await mongoose.startSession();

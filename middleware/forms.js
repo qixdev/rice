@@ -1,4 +1,4 @@
-const { Types } = require("mongoose");
+const {Types} = require("mongoose");
 
 const validateFormId = (req, res, next) => {
     const formId = req.params.id;
@@ -16,10 +16,10 @@ const validateFormBody = (req, res, next) => {
         description,
         fields,
         is_anonymous: isAnonymous,
-        submissions_limit: submissionsLimit,
+        // submissions_limit: submissionsLimit,
         // submission_reward: submissionReward
     } = req.body;
-
+    const submissionsLimit = 20;
     if (!title || typeof title !== 'string') {
         return res.status(400).json({error: 'title is required and must be a string'});
     }
@@ -81,7 +81,7 @@ const validateFormBody = (req, res, next) => {
     next();
 };
 
-module.exports = { validateFormId, validateFormBody };
+module.exports = {validateFormId, validateFormBody};
 // Using `module.exports` in this case could cause an error because the file uses ES6 `import` and `export` syntax.
 // Mixing CommonJS (`module.exports`) and ES6 modules can lead to compatibility issues, as they are different module systems.
 // Specifically, when using ES6 destructured `import` statements (`import { ... }`), the exported values must align with
