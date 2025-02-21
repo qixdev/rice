@@ -195,7 +195,7 @@ export default {
         alert("3 Images needed");
         return;
       }
-      this.newsFormData.images.forEach((file, index) => {
+      this.newsFormData.images.forEach((file) => {
         formData.append("images", file);
       });
       try {
