@@ -7,6 +7,7 @@ const {
     updateForm,
     deleteForm,
     getUserForms, calculateFormCost,
+    searchSurveys,
 } = require('../controllers/forms');
 const {
     getFormSubmissions,
@@ -35,6 +36,8 @@ router.get('/my-submissions', protect, async (req, res) => {
     const submissions = await getUserSubmissions(user._id);
     res.status(200).json(submissions);
 });
+
+router.get('/search', protect, searchSurveys);
 
 
 // Get created forms of the user.

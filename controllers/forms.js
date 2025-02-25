@@ -1,7 +1,6 @@
 const Form = require('../models/Form');
 
 
-
 // TODO: centralize this constant in one class though.
 
 async function createForm(formData, session = null) {
@@ -14,6 +13,25 @@ async function createForm(formData, session = null) {
 async function getForm(formId) {
     return await Form.findById(formId).select('-__v');
 }
+
+const searchSurveys = async (req, res) => {
+    try {
+        const {query} = req.query;
+        if (!query) {
+            return res.status(400).json({error: "Search query is required"});
+        }
+
+        const results = await Form.find(
+            {$text: {$search: query}}, // Uses MongoDB text index
+            {score: {$meta: "textScore"}} // Sort by relevance
+        ).sort({score: {$meta: "textScore"}});
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: "Failed to perform search"});
+    }
+};
 
 // cost for each user with burnt fee.
 async function calculateFormCost(form) {
@@ -61,4 +79,5 @@ module.exports = {
     deleteForm,
     getUserForms,
     calculateFormCost,
+    searchSurveys,
 }
