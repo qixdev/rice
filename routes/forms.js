@@ -67,14 +67,12 @@ router.get('', protect, async (req, res) => {
 // this should be resolved after creating the ui todo
 router.get('/:id', protect, validateFormId, async (req, res) => {
     const formId = req.params.id;
-
-
     try {
         const form = await getForm(formId);
         if (!form) {
             return res.status(404).json({error: 'Form not found'});
         }
-        if (form.createdBy.toString() !== req.user._id.toString()) {
+        if (form.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin" && req.user.role !== "admin") {
             return res.status(403).json({error: 'You do not have access to this form'});
         }
         res.status(200).json(form);
@@ -132,7 +130,7 @@ router.put('/:id', protect, validateFormId, validateFormBody, async (req, res) =
         if (!form) {
             return res.status(404).json({error: 'form not found'});
         }
-        if (form.createdBy.toString() !== req.user._id.toString()) {
+        if (form.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
             return res.status(403).json({error: 'you do not have permission to update this form'});
         }
 
@@ -172,7 +170,7 @@ router.delete('/:id', protect, validateFormId, async (req, res) => {
     if (!form) {
         return res.status(404).json({error: 'form not found'});
     }
-    if (form.createdBy.toString() !== req.user._id.toString()) {
+    if (form.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
         return res.status(403).json({error: 'You do not have permission to delete this form'});
     }
     await deleteForm(formId);
@@ -306,7 +304,7 @@ router.get('/:id/submissions', protect, validateFormId, async (req, res) => {
     if (!form) {
         return res.status(404).json({error: 'form not found'});
     }
-    if (form.createdBy.toString() !== req.user._id.toString()) {
+    if (form.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
         return res.status(403).json({error: 'you do not have permission to view this form\'s submissions'});
     }
     const formSubmissions = await getFormSubmissions(formId);

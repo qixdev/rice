@@ -16,7 +16,7 @@ async function loginUser(email, password) {
     if (!user) throw new Error('Invalid credentials');
     const isMatch = await user.comparePassword(password); // this method uses bcrypt under the hood
     if (!isMatch) throw new Error('Invalid credentials');
-    return {token: user.generateToken()};
+    return {token: user.generateToken(), role: user.role};
 }
 
 /* Pretty complex functionality and not needed for a basic MVP, Rusya probably will do it TODO*/
